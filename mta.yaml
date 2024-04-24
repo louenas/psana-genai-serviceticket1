@@ -1,0 +1,222 @@
+_schema-version: '3.1'
+ID: s4hcserviceticketassistant1
+version: 1.0.0
+description: A simple CAP project.
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - rm -rf build/dist
+        - mkdir -p build/dist
+        - rm -rf build/ui-deployer
+        - mkdir -p build/ui-deployer
+    - builder: custom
+      commands:
+        - npm install --production
+        - >-
+          bash -c "cds -v | grep 'cds-dk' || npm i --production --no-save
+          @sap/cds-dk @sap/mdk-tools"
+        - bash -c "export PATH=$PATH:$(pwd)/node_modules/.bin"
+        - cds build --production
+  after-all:
+    - builder: custom
+      commands:
+        - npm install
+modules:
+  - name: >-
+      s4hcserviceticketassistant1-s4hcserviceticketassistant1.S4HCServiceOrderIntelligence
+    type: html5
+    path: app/s4hcserviceticketassistant1.S4HCServiceOrderIntelligence
+    build-parameters:
+      builder: custom
+      commands:
+        - rm -rf dist-zip dist
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateManifestBundle
+          --include-task=generateCachebusterInfo
+        - mkdir dist-zip
+        - >-
+          bash -c "cd dist && npx bestzip
+          ../dist-zip/s4hcserviceticketassistant1S4HCServiceOrderIntelligence.zip
+          *"
+      _artifactName: s4hcserviceticketassistant1S4HCServiceOrderIntelligence.zip
+      supported-platforms: []
+      build-result: dist-zip
+  - name: s4hcserviceticketassistant1-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules
+        - package-lock.json
+    requires:
+      - name: s4hcserviceticketassistant1-service-uaa
+      - name: s4hcserviceticketassistant1-service-db
+  - name: s4hcserviceticketassistant1-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      memory: 256MB
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules
+        - package-lock.json
+    requires:
+      - name: s4hcserviceticketassistant1-service-uaa
+      - name: s4hcserviceticketassistant1-service-db
+      - name: s4hcserviceticketassistant1-service-destination
+      - name: s4hcserviceticketassistant1-service-metadata
+      - name: s4hcserviceticketassistant1-service-connectivity
+      - name: s4hcserviceticketassistant1-service-logs
+  - name: s4hcserviceticketassistant1-aux-destinations
+    type: com.sap.application.content
+    parameters:
+      content:
+        subaccount:
+          existing_destinations_policy: update
+          destinations:
+            - Authentication: OAuth2UserTokenExchange
+              Name: s4hcserviceticketassistant1-service-uaa
+              ServiceInstanceName: s4hcserviceticketassistant1-uaa
+              ServiceKeyName: s4hcserviceticketassistant1-uaa-key
+              sap.cloud.service: lcap.s4hcserviceticketassistant1
+            - Authentication: OAuth2UserTokenExchange
+              Name: s4hcserviceticketassistant1-app-srv
+              TokenServiceInstanceName: s4hcserviceticketassistant1-uaa
+              TokenServiceKeyName: s4hcserviceticketassistant1-uaa-key
+              URL: ~{srv-api/srv-url}
+              sap.cloud.service: lcap.s4hcserviceticketassistant1
+            - Name: s4hcserviceticketassistant1-service-html5-apps-repo-host
+              ServiceInstanceName: s4hcserviceticketassistant1-html5-apps-repo-host
+              ServiceKeyName: s4hcserviceticketassistant1-html5-apps-repo-host-key
+              sap.cloud.service: lcap.s4hcserviceticketassistant1
+            - Authentication: OAuth2UserTokenExchange
+              Name: s4hcserviceticketassistant1-productSupportSrv
+              TokenServiceInstanceName: s4hcserviceticketassistant1-uaa
+              TokenServiceKeyName: s4hcserviceticketassistant1-uaa-key
+              URL: ~{srv-api/srv-url}/service/productSupport
+              sap.cloud.service: lcap.s4hcserviceticketassistant1
+              sap.applicationdevelopment.actions.enabled: false
+              sap.build.usage: CAP
+              sap.processautomation.enabled: false
+              HTML5.DynamicDestination: false
+              WebIDEEnabled: false
+              MobileEnabled: false
+              AppgyverEnabled: false
+    build-parameters:
+      no-source: true
+    requires:
+      - name: s4hcserviceticketassistant1-service-uaa
+        parameters:
+          service-key:
+            name: s4hcserviceticketassistant1-uaa-key
+      - name: srv-api
+      - name: s4hcserviceticketassistant1-service-html5-apps-repo-host
+        parameters:
+          service-key:
+            name: s4hcserviceticketassistant1-html5-apps-repo-host-key
+      - name: s4hcserviceticketassistant1-service-destination
+        parameters:
+          content-target: true
+  - name: s4hcserviceticketassistant1-launchpad
+    type: html5
+    path: build/launchpad
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateManifestBundle
+          --include-task=generateCachebusterInfo
+        - bash -c "cd dist && npx bestzip ../../../build/dist/launchpad.zip *"
+        - rm -rf dist
+      _artifactName: launchpad.zip
+      supported-platforms: []
+      build-result: ../../build/dist
+  - name: s4hcserviceticketassistant1-aux-ui-deployer
+    type: com.sap.application.content
+    path: build/ui-deployer
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: >-
+            s4hcserviceticketassistant1-s4hcserviceticketassistant1.S4HCServiceOrderIntelligence
+          artifacts:
+            - s4hcserviceticketassistant1S4HCServiceOrderIntelligence.zip
+          target-path: resources
+        - name: s4hcserviceticketassistant1-launchpad
+          artifacts:
+            - launchpad.zip
+          target-path: resources
+    requires:
+      - name: s4hcserviceticketassistant1-service-html5-apps-repo-host
+        parameters:
+          content-target: true
+resources:
+  - type: org.cloudfoundry.managed-service
+    name: s4hcserviceticketassistant1-service-uaa
+    parameters:
+      service: xsuaa
+      service-plan: application
+      service-name: s4hcserviceticketassistant1-uaa
+      path: xs-security.json
+      config:
+        oauth2-configuration:
+          redirect-uris:
+            - https://*.${default-domain}/login/*
+        xsappname: s4hcserviceticketassistant1-${space}
+        role-collections: []
+  - type: org.cloudfoundry.managed-service
+    name: s4hcserviceticketassistant1-service-db
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+      service-name: s4hcserviceticketassistant1-db
+  - type: org.cloudfoundry.managed-service
+    name: s4hcserviceticketassistant1-service-destination
+    parameters:
+      service: destination
+      service-plan: lite
+      service-name: s4hcserviceticketassistant1-destination
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
+  - type: org.cloudfoundry.user-provided-service
+    name: s4hcserviceticketassistant1-service-metadata
+    parameters:
+      service: metadata
+      service-plan: standard
+      service-name: s4hcserviceticketassistant1-metadata
+      config:
+        default-domain: ${default-domain}
+  - type: org.cloudfoundry.managed-service
+    name: s4hcserviceticketassistant1-service-connectivity
+    parameters:
+      service: connectivity
+      service-plan: lite
+      service-name: s4hcserviceticketassistant1-connectivity
+  - type: org.cloudfoundry.managed-service
+    name: s4hcserviceticketassistant1-service-logs
+    parameters:
+      service: application-logs
+      service-plan: lite
+      service-name: s4hcserviceticketassistant1-logs
+  - type: org.cloudfoundry.managed-service
+    name: s4hcserviceticketassistant1-service-html5-apps-repo-host
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+      service-name: s4hcserviceticketassistant1-html5-apps-repo-host

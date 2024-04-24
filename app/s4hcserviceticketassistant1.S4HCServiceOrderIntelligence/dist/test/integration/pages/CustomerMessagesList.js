@@ -1,0 +1,2 @@
+sap.ui.define(["sap/fe/test/ListReport"],function(e){"use strict";var s={actions:{},assertions:{}};return new e({appId:"s4hcserviceticketassistant1.S4HCServiceOrderIntelligence",componentId:"CustomerMessagesList",contextPath:"/CustomerMessages"},s)});
+//# sourceMappingURL=CustomerMessagesList.js.map

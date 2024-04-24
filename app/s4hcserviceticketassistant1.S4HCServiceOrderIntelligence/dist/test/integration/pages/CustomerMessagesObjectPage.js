@@ -1,0 +1,2 @@
+sap.ui.define(["sap/fe/test/ObjectPage"],function(e){"use strict";var s={actions:{},assertions:{}};return new e({appId:"s4hcserviceticketassistant1.S4HCServiceOrderIntelligence",componentId:"CustomerMessagesObjectPage",contextPath:"/CustomerMessages"},s)});
+//# sourceMappingURL=CustomerMessagesObjectPage.js.map
