@@ -96,7 +96,6 @@
       "css": []
     },
     "routing": {
-      "config": {},
       "routes": [
         {
           "pattern": ":?query:",
@@ -135,7 +134,19 @@
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/CustomerMessages"
+              "contextPath": "/CustomerMessages",
+              "content": {
+                "header": {
+                  "actions": {
+                    "DataFieldForAction::productSupportSrv.Action1": {
+                      "afterExecution": {
+                        "navigateToInstance": true,
+                        "enableAutoScroll": true
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }

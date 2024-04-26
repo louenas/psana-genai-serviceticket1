@@ -17,6 +17,13 @@ service productSupportSrv
     {
         *,
         a_ServiceOrder.ServiceOrder
+    }
+    actions
+    {
+        action Action1
+        (
+        )
+        returns String;
     };
 
     entity A_ServiceOrder as projection on S4HCP_ServiceOrder_Odata.A_ServiceOrder

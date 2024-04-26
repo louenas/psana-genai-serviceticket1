@@ -152,7 +152,17 @@ annotate service.CustomerMessages with @(
                 $Type : 'UI.DataField',
                 Value : a_ServiceOrder_ServiceOrder,
                 Label : 'a_ServiceOrder_ServiceOrder',
-            },
+            }
         ],
     }
+);
+annotate service.CustomerMessages with @(
+    UI.Identification : [
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'productSupportSrv.Action1',
+            Label : 'Generate',
+            Criticality : #Positive,
+        },
+    ]
 );

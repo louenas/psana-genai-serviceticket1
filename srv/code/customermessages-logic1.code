@@ -1,0 +1,12 @@
+{
+    "version": "2.0",
+    "codes": [],
+    "configuration": {
+        "phase": "after",
+        "events": [
+            "READ"
+        ],
+        "entity": "productSupportSrv.CustomerMessages"
+    },
+    "hash": "a1cb5549ef065dd3408a271d7d8e14d67dd8838d57386b6c8751b28144ee345294bffbefe83da35a19d549b36b9c943bba173590e4230f54d4146872abd907de"
+}
