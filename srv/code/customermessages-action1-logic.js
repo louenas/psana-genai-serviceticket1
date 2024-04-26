@@ -21,8 +21,13 @@ module.exports = async function (request) {
 
     const data = {
         model: "gpt-3.5-turbo",
-        prompt: 'Translate the following text to English: ' + summuryOriginal,
-        max_tokens: 150,
+        messages: [
+            {
+              "role": "user",
+              "content": 'Translate the following text to English: ' + summuryOriginal
+            }
+          ],
+        max_tokens: 250,
         temperature: 0.1
     };
 
