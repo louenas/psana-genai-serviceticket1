@@ -24,6 +24,16 @@ service productSupportSrv
         (
         )
         returns String;
+
+        action Action2
+        (
+        )
+        returns String;
+
+        action Action3
+        (
+        )
+        returns String;
     };
 
     entity A_ServiceOrder as projection on S4HCP_ServiceOrder_Odata.A_ServiceOrder

@@ -22,12 +22,19 @@ annotate service.CustomerMessages with @(
     UI.LineItem : [
         {
             $Type : 'UI.DataField',
+            Value : messageTitleCustomerLanguage,
+        },
+        {
+            $Type : 'UI.DataField',
             Value : title,
         },
         {
             $Type : 'UI.DataField',
-            Value : ID,
-            Label : 'ID',
+            Value : summaryCustomerLanguage,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : summary,
         },
         {
             $Type : 'UI.DataField',
@@ -36,10 +43,6 @@ annotate service.CustomerMessages with @(
         {
             $Type : 'UI.DataField',
             Value : productName,
-        },
-        {
-            $Type : 'UI.DataField',
-            Value : summary,
         },
         {
             $Type : 'UI.DataField',
@@ -54,20 +57,19 @@ annotate service.CustomerMessages with @(
             Value : sentiment,
         },
         {
-            $Type : 'UI.DataField',
-            Value : messageTitleCustomerLanguage,
+            $Type : 'UI.DataFieldForAction',
+            Action : 'productSupportSrv.Action3',
+            Label : 'To English',
         },
         {
             $Type : 'UI.DataField',
-            Value : summaryCustomerLanguage,
+            Value : fullMessageTextEnglish,
+            ![@UI.Hidden],
         },
         {
             $Type : 'UI.DataField',
-            Value : originatingCountry,
-        },
-        {
-            $Type : 'UI.DataField',
-            Value : sourceLanguage,
+            Value : fullMessageTextCustomerLanguage,
+            ![@UI.Hidden],
         },
     ]
 );
@@ -161,7 +163,13 @@ annotate service.CustomerMessages with @(
         {
             $Type : 'UI.DataFieldForAction',
             Action : 'productSupportSrv.Action1',
-            Label : 'Generate',
+            Label : 'To English',
+            Criticality : #Positive,
+        },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'productSupportSrv.Action2',
+            Label : 'Action2',
             Criticality : #Positive,
         },
     ]
