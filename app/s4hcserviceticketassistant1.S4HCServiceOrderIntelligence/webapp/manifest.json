@@ -63,7 +63,8 @@
         "sap.m": {},
         "sap.ui.core": {},
         "sap.ushell": {},
-        "sap.fe.templates": {}
+        "sap.fe.templates": {},
+        "sap.f": {}
       }
     },
     "contentDensities": {
@@ -100,12 +101,17 @@
         {
           "pattern": ":?query:",
           "name": "CustomerMessagesList",
-          "target": "CustomerMessagesList"
+          "target": [
+            "CustomerMessagesList"
+          ]
         },
         {
           "pattern": "CustomerMessages({key}):?query:",
           "name": "CustomerMessagesObjectPage",
-          "target": "CustomerMessagesObjectPage"
+          "target": [
+            "CustomerMessagesList",
+            "CustomerMessagesObjectPage"
+          ]
         }
       ],
       "targets": {
@@ -138,7 +144,9 @@
               },
               "initialLoad": "Auto"
             }
-          }
+          },
+          "controlAggregation": "beginColumnPages",
+          "contextPattern": ""
         },
         "CustomerMessagesObjectPage": {
           "type": "Component",
@@ -167,9 +175,24 @@
                 }
               }
             }
-          }
+          },
+          "controlAggregation": "midColumnPages",
+          "contextPattern": "/CustomerMessages({key})"
         }
+      },
+      "config": {
+        "flexibleColumnLayout": {
+          "defaultTwoColumnLayoutType": "TwoColumnsMidExpanded",
+          "defaultThreeColumnLayoutType": "ThreeColumnsMidExpanded"
+        },
+        "routerClass": "sap.f.routing.Router"
       }
+    },
+    "rootView": {
+      "viewName": "sap.fe.templates.RootContainer.view.Fcl",
+      "type": "XML",
+      "async": true,
+      "id": "appRootView"
     }
   },
   "sap.fiori": {

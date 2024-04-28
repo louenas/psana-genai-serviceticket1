@@ -20,17 +20,12 @@ service productSupportSrv
     }
     actions
     {
-        action Action1
+        action Action1 //Details generateReply
         (
         )
         returns String;
 
-        action Action2
-        (
-        )
-        returns String;
-
-        action Action3
+        action Action3 //List toEnglish
         (
         )
         returns String;

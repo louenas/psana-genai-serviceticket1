@@ -163,13 +163,7 @@ annotate service.CustomerMessages with @(
         {
             $Type : 'UI.DataFieldForAction',
             Action : 'productSupportSrv.Action1',
-            Label : 'To English',
-            Criticality : #Positive,
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
-            Action : 'productSupportSrv.Action2',
-            Label : 'Action2',
+            Label : 'Generate Reply',
             Criticality : #Positive,
         },
     ]
