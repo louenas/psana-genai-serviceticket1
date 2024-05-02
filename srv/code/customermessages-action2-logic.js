@@ -1,4 +1,6 @@
+const cds = require("@sap/cds");
 const lLMProxy = require('./genAIHubProxyDirect');
+const { serviceOrderService } = require("@sap/cloud-sdk-vdm-service-order-service");
 
 /**
  * 
@@ -14,9 +16,12 @@ module.exports = async function(request) {
     const fullMessageOriginal = CustomerMessages.fullMessageTextCustomerLanguage;
 
     try {
-       
-    } catch (error) {
-        console.error('Error:', error.message);
-        request.error(error.code, error.message);
-    }
+        const { serviceOrderApi } = serviceOrderService()
+        //const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata' });
+        const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
+        console.log(result);
+    
+      } catch (error) {
+        console.error('Error:', error);
+      }
 }

@@ -173,7 +173,8 @@
                     }
                   }
                 }
-              }
+              },
+              "sectionLayout": "Tabs"
             }
           },
           "controlAggregation": "midColumnPages",

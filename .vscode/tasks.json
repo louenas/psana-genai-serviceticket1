@@ -139,6 +139,14 @@
       }
     },
     {
+      "label": "DeployToHANADB:.env3",
+      "type": "shell",
+      "command": "eval $(cat ${workspaceFolder}/env/.env3) cds deploy --to hana --auto-undeploy",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
       "label": "PreLaunchTask for Run s4hcserviceticketassistant1-livedata",
       "type": "process",
       "command": "npx",
