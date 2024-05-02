@@ -1,4 +1,4 @@
-const lLMProxy = require('./lLMProxy');
+const lLMProxy = require('./genAIHubProxyDirect');
 
 /**
  * @On(event = { "Action1" }, entity = "productSupportSrv.CustomerMessages")
@@ -9,6 +9,6 @@ module.exports = async function (request) {
     try {
     } catch (error) {
         console.error('Error:', error.message);
-        throw error;
+        request.error(error.code, error.message);
     }
 }

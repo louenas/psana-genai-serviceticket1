@@ -25,6 +25,11 @@ service productSupportSrv
         )
         returns String;
 
+        action Action2 //Details Create SO
+        (
+        )
+        returns String;
+
         action Action3 //List toEnglish
         (
         )

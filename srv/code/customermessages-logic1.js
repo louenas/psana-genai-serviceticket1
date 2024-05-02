@@ -1,5 +1,5 @@
 const { foreach } = require('@sap/cds');
-const lLMProxy = require('./lLMProxy');
+const lLMProxy = require('./genAIHubProxyDirect');
 
 /**
  * @After(event = { "READ" }, entity = "productSupportSrv.CustomerMessages")
@@ -11,7 +11,6 @@ module.exports = async function (results, request) {
         for (i = 0; i < results.length; i++) {
             const oneMessage = results[i];
 
-            console.log(`The list of customer messages has been shown.`);
             const ID = oneMessage["ID"];
             const summaryCustomerLanguage = oneMessage["summaryCustomerLanguage"];
 
@@ -31,12 +30,16 @@ module.exports = async function (results, request) {
                 JSON template: {messageSummary: Text, category : Text, urgency: Text, sentiment: Text}
                 `;
 
-                    const resultJSON = await lLMProxy(promt);
+                    const resultJSON = await lLMProxy(request, promt);
 
                     const messageSummary = resultJSON["messageSummary"];
+                    console.log(`messageSummary: ${messageSummary}`);
                     const category = resultJSON["category"];
+                    console.log(`category: ${category}`);
                     const urgency = resultJSON["urgency"];
+                    console.log(`urgency: ${urgency}`);
                     const sentiment = resultJSON["sentiment"];
+                    console.log(`sentiment: ${sentiment}`);
 
                     if (CustomerMessages) {
                         await UPDATE('productSupportSrv.CustomerMessages')
@@ -45,12 +48,14 @@ module.exports = async function (results, request) {
                             .set({ urgency: urgency })
                             .set({ sentiment: sentiment })
                             .where({ ID: ID });
+
+                        console.log(`CustomerMessages with ID ${ID} updated`);
                     } else {
                         console.error('No CustomerMessages entity found with the provided ID');
                     }
                 } catch (error) {
                     console.error('Error:', error.message);
-                    throw error;
+                    request.error(error.code, error.message);
                 }
             }
         }

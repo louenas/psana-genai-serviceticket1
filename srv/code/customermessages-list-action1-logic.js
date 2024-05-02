@@ -1,4 +1,4 @@
-const lLMProxy = require('./lLMProxy');
+const lLMProxy = require('./genAIHubProxyDirect');
 
 /**
  * 
@@ -21,22 +21,27 @@ module.exports = async function(request) {
         JSON template: {titleEnglish: Text, summaryEnglish: Text, fullMessageEnglish: Text}
         `;
 
-        const tranlationJSON = await lLMProxy(promt);
+        const tranlationJSON = await lLMProxy(request, promt);
 
         const titleEnglish = tranlationJSON["titleEnglish"];
+        console.log(`titleEnglish ${titleEnglish}`)
         const summaryEnglish = tranlationJSON["summaryEnglish"];
+        console.log(`summaryEnglish ${summaryEnglish}`)
         const fullMessageEnglish = tranlationJSON["fullMessageEnglish"];
+        console.log(`fullMessageEnglish ${fullMessageEnglish}`)
+
         if (CustomerMessages) {
             await UPDATE('productSupportSrv.CustomerMessages')
                 .set({ title: titleEnglish })
                 .set({ summary: summaryEnglish })
                 .set({ fullMessageTextEnglish: fullMessageEnglish})
                 .where({ ID: ID });
+            console.log(`CustomerMessages with ID ${ID} updated`);
         } else {
             console.error('No CustomerMessages entity found with the provided ID');
         }
     } catch (error) {
         console.error('Error:', error.message);
-        throw error;
+        request.error(error.code, error.message);
     }
 }

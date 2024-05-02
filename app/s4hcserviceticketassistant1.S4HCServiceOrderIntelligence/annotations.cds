@@ -166,5 +166,10 @@ annotate service.CustomerMessages with @(
             Label : 'Generate Reply',
             Criticality : #Positive,
         },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'productSupportSrv.Action2',
+            Label : 'Create S4HC SO',
+        },
     ]
 );

@@ -63,7 +63,8 @@
         "sap.m": {},
         "sap.ui.core": {},
         "sap.ushell": {},
-        "sap.fe.templates": {}
+        "sap.fe.templates": {},
+        "sap.f": {}
       }
     },
     "contentDensities": {
@@ -96,17 +97,21 @@
       "css": []
     },
     "routing": {
-      "config": {},
       "routes": [
         {
           "pattern": ":?query:",
           "name": "CustomerMessagesList",
-          "target": "CustomerMessagesList"
+          "target": [
+            "CustomerMessagesList"
+          ]
         },
         {
           "pattern": "CustomerMessages({key}):?query:",
           "name": "CustomerMessagesObjectPage",
-          "target": "CustomerMessagesObjectPage"
+          "target": [
+            "CustomerMessagesList",
+            "CustomerMessagesObjectPage"
+          ]
         }
       ],
       "targets": {
@@ -124,9 +129,24 @@
                     "route": "CustomerMessagesObjectPage"
                   }
                 }
-              }
+              },
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": {
+                    "condensedTableLayout": true
+                  },
+                  "actions": {
+                    "DataFieldForAction::productSupportSrv.Action3": {
+                      "enableOnSelect": "multi"
+                    }
+                  }
+                }
+              },
+              "initialLoad": "Auto"
             }
-          }
+          },
+          "controlAggregation": "beginColumnPages",
+          "contextPattern": ""
         },
         "CustomerMessagesObjectPage": {
           "type": "Component",
@@ -135,11 +155,44 @@
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/CustomerMessages"
+              "contextPath": "/CustomerMessages",
+              "content": {
+                "header": {
+                  "actions": {
+                    "DataFieldForAction::productSupportSrv.Action1": {
+                      "afterExecution": {
+                        "navigateToInstance": true,
+                        "enableAutoScroll": true
+                      }
+                    },
+                    "DataFieldForAction::productSupportSrv.Action2": {
+                      "afterExecution": {
+                        "navigateToInstance": true,
+                        "enableAutoScroll": true
+                      }
+                    }
+                  }
+                }
+              }
             }
-          }
+          },
+          "controlAggregation": "midColumnPages",
+          "contextPattern": "/CustomerMessages({key})"
         }
+      },
+      "config": {
+        "flexibleColumnLayout": {
+          "defaultTwoColumnLayoutType": "TwoColumnsMidExpanded",
+          "defaultThreeColumnLayoutType": "ThreeColumnsMidExpanded"
+        },
+        "routerClass": "sap.f.routing.Router"
       }
+    },
+    "rootView": {
+      "viewName": "sap.fe.templates.RootContainer.view.Fcl",
+      "type": "XML",
+      "async": true,
+      "id": "appRootView"
     }
   },
   "sap.fiori": {

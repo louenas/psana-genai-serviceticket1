@@ -1,14 +1,14 @@
 const axios = require('axios');
 
 const openAiApiUrl = 'https://api.openai.com/v1/chat/completions';
-const apiKey = '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';
+const apiKey = 'XXXX';
 
 const headers = {
     'Authorization': `Bearer ${apiKey}`,
     'Content-Type': 'application/json',
 };
 
-module.exports =  async function (prompt) {
+module.exports =  async function (req,prompt) {
 
   const data = {
     model: "gpt-3.5-turbo",
@@ -24,7 +24,7 @@ module.exports =  async function (prompt) {
 
   try {
     const response = await axios.post(openAiApiUrl, data, { headers });
-    console.log('Response:', JSON.stringify(response.data.choices[0]));
+    console.log('Response: ', JSON.stringify(response.data.choices[0]));
     const result = response.data.choices[0].message.content;
     return JSON.parse(result);
   } catch (error) {

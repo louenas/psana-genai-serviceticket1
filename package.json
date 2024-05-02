@@ -1,18 +1,19 @@
 {
   "name": "s4hcserviceticketassistant1",
   "version": "1.0.0",
-  "description": "A simple CAP project.",
+  "description": "GenAI App - S/4 Cloud Service Order, GenA Hub and Vector engine",
   "repository": "<Add your repository here>",
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
     "@sap-cloud-sdk/http-client": "^3.14.0",
+    "@sap-cloud-sdk/odata-v4": "^3.11.0",
     "@sap-cloud-sdk/util": "^3.14.0",
     "@sap/cds": "^7",
     "@sap/cds-hana": "^2",
     "@sap/low-code-event-handler": "^1.2.4",
     "@sap/mdk-tools": "^1.3.1",
-    "@sap/xsenv": ">=3.3.2 <3.3.3",
+    "@sap/xsenv": "^4.2.0",
     "@sap/xssec": "^3.6.1",
     "express": "^4",
     "hdb": "^0.19.8",
@@ -53,6 +54,12 @@
           "credentials": {
             "destination": "S4HCP-ServiceOrder-Odata"
           }
+        }
+      },
+      "GENAI_ENABLEMENT_GENAICORE": {
+        "kind": "rest",
+        "credentials": {
+            "destination": "GENAI_ENABLEMENT_GENAICORE"
         }
       }
     },
