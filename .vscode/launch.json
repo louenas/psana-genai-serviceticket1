@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run s4hcserviceticketassistant1",
+      "name": "Env1 Run s4hcserviceticketassistant1",
       "runtimeExecutable": "cds",
       "request": "launch",
       "args": [
@@ -20,7 +20,26 @@
       }
     },
     {
-      "name": "S4HCP-ServiceOrder-Odata",
+      "name": "Env3 Run s4hcserviceticketassistant1-livedata",
+      "runtimeExecutable": "cds",
+      "request": "launch",
+      "args": [
+        "watch",
+        "--open"
+      ],
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "PreLaunchTask for Run s4hcserviceticketassistant1-livedata",
+      "envFile": "${workspaceFolder}/env/.env3",
+      "env": {
+        "run.config": "{\"handlerId\":\"lcap_run_config_handler_id\",\"runnableId\":\"{\\\"projectPath\\\":\\\"/home/user/projects/s4hcserviceticketassistant1\\\",\\\"profileName\\\":\\\"\\\"}\"}",
+        "runConfigurations": "{\"authBinding\":{\"authType\":\"Mocked\"},\"odataBinding\":{\"S4HCP_ServiceOrder_Odata\":{\"destination\":\"S4HCP-ServiceOrder-Odata\",\"type\":\"Destination\",\"path\":\"\"}}}"
+      }
+    },
+    {
+      "name": "Env 2 S4HCP-ServiceOrder-Odata",
       "runtimeExecutable": "cds",
       "request": "launch",
       "args": [
@@ -39,7 +58,7 @@
       }
     },
     {
-      "name": "Run s4hcserviceticketassistant1-livedata",
+      "name": "Env4 Run s4hcserviceticketassistant1-live-hana",
       "runtimeExecutable": "cds",
       "request": "launch",
       "args": [
@@ -50,11 +69,11 @@
       "internalConsoleOptions": "openOnSessionStart",
       "type": "pwa-node",
       "cwd": "${workspaceFolder}",
-      "preLaunchTask": "PreLaunchTask for Run s4hcserviceticketassistant1-livedata",
-      "envFile": "${workspaceFolder}/env/.env3",
+      "preLaunchTask": "PreLaunchTask for Env4 Run s4hcserviceticketassistant1-live-hana",
+      "envFile": "${workspaceFolder}/env/.env4",
       "env": {
         "run.config": "{\"handlerId\":\"lcap_run_config_handler_id\",\"runnableId\":\"{\\\"projectPath\\\":\\\"/home/user/projects/s4hcserviceticketassistant1\\\",\\\"profileName\\\":\\\"\\\"}\"}",
-        "runConfigurations": "{\"authBinding\":{\"authType\":\"Mocked\"},\"odataBinding\":{\"S4HCP_ServiceOrder_Odata\":{\"destination\":\"S4HCP-ServiceOrder-Odata\",\"type\":\"Destination\",\"path\":\"\"}}}"
+        "runConfigurations": "{\"dbBinding\":{\"type\":\"SAP HANA Cloud\",\"dbName\":\"s4hcserviceticketassistant1-db\"},\"odataBinding\":{\"S4HCP_ServiceOrder_Odata\":{\"destination\":\"S4HCP-ServiceOrder-Odata\",\"type\":\"Destination\",\"path\":\"\"}}}"
       }
     }
   ]

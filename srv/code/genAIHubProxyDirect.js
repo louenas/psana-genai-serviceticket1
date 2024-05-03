@@ -14,7 +14,7 @@ async function getAccessToken() {
     data: qs.stringify({
       grant_type: 'client_credentials',
       client_id: 'sb-2a48918b-92f4-4612-b03e-f96c279abb26!b275360|aicore!b164',
-      client_secret: 'xxxxx'
+      client_secret: 'XXXX'
     })
   };
 
@@ -60,6 +60,7 @@ module.exports = async function (req, prompt) {
     var res = JSON.parse(results.data.choices[0].message.content);
     return res;
   } catch (error) {
+    console.error('Error: ', error);
     req.error(error.code, error.message);
     throw error; // Propagate the error
   }

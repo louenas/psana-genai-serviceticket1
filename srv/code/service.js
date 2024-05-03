@@ -3,11 +3,12 @@
  * @version(2.0)
  */
 const LCAPApplicationService = require('@sap/low-code-event-handler');
-const customermessages_Logic1 = require('./code/customermessages-logic1');
-const customermessages_Logic2 = require('./code/customermessages-logic2');
-const customermessages_Action1_Logic = require('./code/customermessages-action1-logic');
-const customermessages_Action2_Logic = require('./code/customermessages-action2-logic');
-const customermessages_List_Action1_Logic = require('./code/customermessages-list-action1-logic');
+
+const customermessages_Logic1 = require('./customermessages-logic1');
+const customermessages_Logic2 = require('./customermessages-logic2');
+const customermessages_Action1_Logic = require('./customermessages-action1-logic');
+const customermessages_Action2_Logic = require('./customermessages-action2-logic');
+const customermessages_List_Action1_Logic = require('./customermessages-list-action1-logic');
 
 class productSupportSrv extends LCAPApplicationService {
     async init() {

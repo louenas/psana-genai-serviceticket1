@@ -5,36 +5,26 @@ using { productSupport } from '../db/schema.cds';
 @path : '/service/productSupport'
 service productSupportSrv
 {
-    annotate CustomerMessages
-    {
-        ServiceOrder
-            @sap.display.format : 'UpperCase'
-            @sap.label : 'Transaction ID';
-    }
-
     @odata.draft.enabled
-    entity CustomerMessages as projection on productSupport.CustomerMessages
-    {
-        *,
-        a_ServiceOrder.ServiceOrder
-    }
-    actions
-    {
-        action Action1 //Details generateReply
-        (
-        )
-        returns String;
+    entity CustomerMessages as
+        projection on productSupport.CustomerMessages
+        actions
+        {
+            action Action1
+            (
+            )
+            returns String;
 
-        action Action2 //Details Create SO
-        (
-        )
-        returns String;
+            action Action2
+            (
+            )
+            returns String;
 
-        action Action3 //List toEnglish
-        (
-        )
-        returns String;
-    };
+            action Action3
+            (
+            )
+            returns String;
+        };
 
     entity A_ServiceOrder as projection on S4HCP_ServiceOrder_Odata.A_ServiceOrder
     {

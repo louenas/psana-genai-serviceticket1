@@ -160,6 +160,30 @@
       "options": {
         "cwd": "${workspaceFolder}"
       }
+    },
+    {
+      "label": "DeployToHANADB:.env4",
+      "type": "shell",
+      "command": "eval $(cat ${workspaceFolder}/env/.env4) cds deploy --to hana --auto-undeploy",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "PreLaunchTask for Env4 Run s4hcserviceticketassistant1-live-hana",
+      "type": "process",
+      "command": "npx",
+      "args": [
+        "dev-cap-tools",
+        "gen-entrypoint"
+      ],
+      "dependsOn": [
+        "BuildMDK",
+        "DeployToHANADB:.env4"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     }
   ]
 }
