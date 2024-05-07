@@ -14,7 +14,7 @@ async function getAccessToken() {
     data: qs.stringify({
       grant_type: 'client_credentials',
       client_id: 'sb-2a48918b-92f4-4612-b03e-f96c279abb26!b275360|aicore!b164',
-      client_secret: 'XXXX'
+      client_secret: '7144c864-9e46-4add-88f8-ad6bbe163863$DvKhx7vRDHo7nn3l63CxHCIQgFvjssH_LkJlyioiTAk='
     })
   };
 
