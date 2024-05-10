@@ -17,10 +17,6 @@ module.exports = async function (request) {
   try {
     const { serviceOrderApi, serviceOrderTextApi, serviceOrderItemApi, serviceOrderPersonRespApi } = serviceOrderService();
 
-    //const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata' });
-    // const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
-    // console.log(result);
-
     var toTextEntity = serviceOrderTextApi
     .entityBuilder()
     .language('EN')

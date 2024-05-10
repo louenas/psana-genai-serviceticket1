@@ -25,8 +25,9 @@ entity CustomerMessages
     a_ServiceOrder : Association to one S4HCP_ServiceOrder_Odata.A_ServiceOrder;
 }
 
-entity Books { 
-  title         : String(111);
-  description   : LargeString;  
-  embedding     : Vector(1536); // vector space w/ 1536 dimensions
+entity ServiceOrderData { 
+  SOID  : String (10);
+  SOTitle : LargeString;
+  SOInfo  : LargeString;  
+  embedding : Vector(1536); // vector space w/ 1536 dimensions
 } 

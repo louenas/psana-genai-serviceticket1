@@ -1,5 +1,7 @@
 const { foreach } = require('@sap/cds');
+const { serviceOrderService } = require("@sap/cloud-sdk-vdm-service-order-service");
 const lLMProxy = require('./genAIHubProxyDirect');
+const { select } = require('@sap/cds/libx/_runtime/hana/execute');
 
 const array2VectorBuffer = (data) => {
     const sizeFloat = 4; // each float takes 4 bytes
@@ -22,35 +24,39 @@ const array2VectorBuffer = (data) => {
 module.exports = async function (request) {
     const { ID } = request._params[0];
     try {
-        //let books = await SELECT.from('productSupport.Books')
-        //console.log(books);
+        
+        const { serviceOrderApi, serviceOrderTextApi, serviceOrderItemApi, serviceOrderPersonRespApi } = serviceOrderService();
 
-        // const booksJson = [
-        //     { title: "The Art of Product Support", description: "A comprehensive guide to mastering product support strategies and techniques covering everything from troubleshooting to customer satisfaction.", embedding: 0 },
-        //     { title: "Effective Product Support", description: "Solutions Discover proven methodologies and best practices for delivering efficient and effective product support services, enhancing user experiences.", embedding: 0 },
-        //     { title: "Advanced Product Support", description: "Techniques Explore advanced techniques and innovative approaches in product support, designed to optimize workflows and maximize customer success.", embedding: 0 }
-        // ]
+        //const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata' });
+        const result = await serviceOrderApi.requestBuilder().getByKey('8000000122').select(
+            serviceOrderApi.schema.ALL_FIELDS,
+            serviceOrderApi.schema.TO_ITEM,
+            serviceOrderApi.schema.TO_TEXT,
+            serviceOrderApi.schema.TO_PERSON_RESPONSIBLE
+        ).execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
+        console.log(result);
 
-        // booksJson.forEach(async (book) => {
-        //     const inputText = book.titile + " " + book.description;
-        //     const embedding = await lLMProxy.embed(request, inputText, process.env.textEmbeddingAda002Endpoint);
-        //     const embeddingBinnary = array2VectorBuffer(embedding);
-        //     book.embedding = embeddingBinnary;
-        //     await INSERT(book).into('productSupport.Books');
-        // });
+        let concatenatedHeader = result.serviceOrder +" "+ result.serviceOrderType +" "+ result.purchaseOrderByCustomer +" "+ result.serviceOrderDescription;
 
-        let prompt = "mastering product support strategies";
+        const concatenatedDescriptions = result.toText.map(item => `${item.serviceOrderItemDescription}`).join(' ');
+
+        result.toText[0].language +" "+ result.toText[0].longTextID +" "+ result.toText[0].longText;
+
+        const concatenatedText = result.toText.map(item => `${item.language} ${item.longTextID} ${item.longText}`).join(' ');
+
+        const info = concatenatedHeader +" "+ concatenatedDescriptions +" "+ concatenatedText;
+
+        let embedding = await lLMProxy.embed(request, info , process.env.textEmbeddingAda002Endpoint);
+
+        const embeddingBinnary = array2VectorBuffer(embedding);
+        await INSERT({soid: result.serviceOrder, sotitle: result.serviceOrderDescription, soinfo: info, embedding: embeddingBinnary, }).into('productSupport.ServiceOrderData');
+        //await UPDATE ("productSupport.ServiceOrderData").set({SOID:result.serviceOrder, SOTITLE: result.serviceOrderDescription, SOINFO: info, embedding: embeddingBinnary, }).where({SOID: result.serviceOrder})
+
+        let prompt = "8000000122 SVO1 WHIR-LW-176532";
         let promptEmbedding = await lLMProxy.embed(request, prompt, process.env.textEmbeddingAda002Endpoint);
         let promptEmbeddingStr = JSON.stringify(promptEmbedding);
-        let similarBooks = await SELECT `title, description` .from('productSupport.Books') .where `cosine_similarity(embedding, to_real_vector(${promptEmbeddingStr})) > 0.9`;
-        console.log("similar book", similarBooks);
-
-        // books.forEach(async (book) => {
-        //     let embedding = await lLMProxy.embed(request, book.title + book.description, process.env.textEmbeddingAda002Endpoint);
-        //     const embeddingBinnary = array2VectorBuffer(embedding);
-        //     await UPDATE ("productSupport.Books").set({embedding: embeddingBinnary}).where({title: book.title})
-        //     // You can use the embedding here or perform other tasks with it
-        // });
+        let similarSO = await SELECT `soid, sotitle` .from('productSupport.ServiceOrderData') .where `cosine_similarity(embedding, to_real_vector(${promptEmbeddingStr})) > 0.2`;
+        console.log(`similar SO: ${similarSO[0].soid} ${similarSO[0].sotitle}`);
 
         console.log("done");
         //let similarBooks = await SELECT.from('productSupport.Books').where`cosine_similarity(embedding, to_real_vector(${embedding})) > 0.9`

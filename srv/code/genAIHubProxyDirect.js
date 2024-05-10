@@ -1,6 +1,8 @@
 const axios = require('axios');
 const qs = require('qs');
 
+let genAIHubAccessToken;
+
 async function getAccessToken() {
   const tokenConfig = {
     method: 'post',
@@ -25,8 +27,8 @@ async function getAccessToken() {
 }
 completion = async function (req, prompt, llmEndpoint) {
 
-  const accessToken = await getAccessToken();
-  if (!accessToken) return;
+  genAIHubAccessToken = genAIHubAccessToken || await getAccessToken();
+  if (!genAIHubAccessToken) return;
 
   const postData = {
     "messages": [
@@ -45,7 +47,7 @@ completion = async function (req, prompt, llmEndpoint) {
     method: 'post',
     url: process.env.genAIModelDeploymentRootURL + llmEndpoint,
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${genAIHubAccessToken}`,
       'AI-Resource-Group': 'default'
     },
     data: postData
@@ -65,8 +67,8 @@ completion = async function (req, prompt, llmEndpoint) {
 }
 
 embed = async function(req, text, llmEndpoint){
-  const accessToken = await getAccessToken();
-  if (!accessToken) return;
+  genAIHubAccessToken = genAIHubAccessToken || await getAccessToken();
+  if (!genAIHubAccessToken) return;
 
   const postData = {
     "input": text
@@ -75,7 +77,7 @@ embed = async function(req, text, llmEndpoint){
     method: 'post',
     url: process.env.genAIModelDeploymentRootURL + llmEndpoint,
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${genAIHubAccessToken}`,
       'AI-Resource-Group': 'default'
     },
     data: postData
