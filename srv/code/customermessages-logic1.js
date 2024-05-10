@@ -1,4 +1,3 @@
-const { foreach } = require('@sap/cds');
 const lLMProxy = require('./genAIHubProxyDirect');
 
 /**
@@ -31,7 +30,7 @@ module.exports = async function (results, request) {
               JSON template: {messageSummary: Text, category : Text, urgency: Text, sentiment: Text}
               `;
 
-                  const resultJSON = await lLMProxy(request, promt);
+                  const resultJSON = await lLMProxy.completion(request, promt, process.env.gpt35TurboEndpoint);
 
                   const messageSummary = resultJSON["messageSummary"];
                   console.log(`messageSummary: ${messageSummary}`);

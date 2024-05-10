@@ -1,20 +1,17 @@
 const axios = require('axios');
 const qs = require('qs');
 
-//const genAIModelDeploymentEndpoint = process.env.deploymentUrl;
-const genAIModelDeploymentEndpoint = "https://api.ai.prod.us-east-1.aws.ml.hana.ondemand.com/v2/inference/deployments/d2e3b34633808207/chat/completions?api-version=2023-05-15";
-
 async function getAccessToken() {
   const tokenConfig = {
     method: 'post',
-    url: 'https://xym1kl6-km83prdb.authentication.us10.hana.ondemand.com/oauth/token',
+    url: process.env.genAITokenURL,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
     data: qs.stringify({
       grant_type: 'client_credentials',
-      client_id: 'sb-2a48918b-92f4-4612-b03e-f96c279abb26!b275360|aicore!b164',
-      client_secret: '7144c864-9e46-4add-88f8-ad6bbe163863$DvKhx7vRDHo7nn3l63CxHCIQgFvjssH_LkJlyioiTAk='
+      client_id: process.env.genAICliemntID,
+      client_secret: process.env.genAIClientSecret
     })
   };
 
@@ -26,7 +23,7 @@ async function getAccessToken() {
     return null;
   }
 }
-module.exports = async function (req, prompt) {
+completion = async function (req, prompt, llmEndpoint) {
 
   const accessToken = await getAccessToken();
   if (!accessToken) return;
@@ -46,7 +43,7 @@ module.exports = async function (req, prompt) {
 
   const config = {
     method: 'post',
-    url: genAIModelDeploymentEndpoint,
+    url: process.env.genAIModelDeploymentRootURL + llmEndpoint,
     headers: {
       'Authorization': `Bearer ${accessToken}`,
       'AI-Resource-Group': 'default'
@@ -57,11 +54,47 @@ module.exports = async function (req, prompt) {
   try {
     const results = await axios(config);
     console.log('Response: ', results);
-    var res = JSON.parse(results.data.choices[0].message.content);
+    //.content should be a string form of a Json object
+    var res = JSON.parse(results.data?.choices[0]?.message?.content);
     return res;
   } catch (error) {
     console.error('Error: ', error);
     req.error(error.code, error.message);
     throw error; // Propagate the error
   }
+}
+
+embed = async function(req, text, llmEndpoint){
+  const accessToken = await getAccessToken();
+  if (!accessToken) return;
+
+  const postData = {
+    "input": text
+  };
+  const config = {
+    method: 'post',
+    url: process.env.genAIModelDeploymentRootURL + llmEndpoint,
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'AI-Resource-Group': 'default'
+    },
+    data: postData
+  };
+
+  try {
+    const results = await axios(config);
+    console.log('Response: ', results);
+    //.embedding is already a Json object
+    var res = results.data?.data[0]?.embedding;
+    return res;
+  } catch (error) {
+    console.error('Error: ', error);
+    req.error(error.code, error.message);
+    throw error; // Propagate the error
+  }
+}
+
+module.exports = {
+  completion,
+  embed
 }

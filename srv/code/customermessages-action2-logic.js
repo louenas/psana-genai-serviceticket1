@@ -15,16 +15,53 @@ module.exports = async function (request) {
   const fullMessageOriginal = CustomerMessages.fullMessageTextCustomerLanguage;
 
   try {
-    const { serviceOrderApi, serviceOrderTextApi } = serviceOrderService();
+    const { serviceOrderApi, serviceOrderTextApi, serviceOrderItemApi, serviceOrderPersonRespApi } = serviceOrderService();
 
     //const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata' });
     // const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
     // console.log(result);
 
-    var toTextEntity = serviceOrderTextApi.entityBuilder().language('EN').longText('Test longText1').build();
+    var toTextEntity = serviceOrderTextApi
+    .entityBuilder()
+    .language('EN')
+    .longText('Test longText1')
+    .build();
 
-    var serviceOrderEntiry = serviceOrderApi.entityBuilder().serviceOrderType('SVO1').serviceOrderDescription('Louenas Test Service Order1').language('EN').serviceDocumentPriority('5')
-      .salesOrganization('1710').distributionChannel('10').division('00').soldToParty('17100002').toText([toTextEntity]).build();
+    var toItemDurationEntity = serviceOrderItemApi
+    .entityBuilder()
+    .serviceOrderItemDescription('Louenas item desc test1')
+    .product('SRV_01')
+    .serviceDuration(1)
+    .serviceDurationUnit('HR')
+    .build();
+
+    var toItemQuantityEntity = serviceOrderItemApi
+    .entityBuilder()
+    .serviceOrderItemDescription('Louenas item desc test1')
+    .product('SRV_02')
+    .quantity(1)
+    .quantityUnit('EA')
+    .build();
+
+    var toPersonRespEntity = serviceOrderPersonRespApi
+    .entityBuilder()
+    .personResponsible('9980003640')
+    .build();
+
+    var serviceOrderEntiry = serviceOrderApi
+    .entityBuilder()
+    .serviceOrderType('SVO1')
+    .serviceOrderDescription('Louenas Test Service Order1')
+    .language('EN')
+    .serviceDocumentPriority('5')
+    .salesOrganization('1710')
+    .distributionChannel('10')
+    .division('00')
+    .soldToParty('17100002')
+    .toText([toTextEntity])
+    .toPersonResponsible([toPersonRespEntity])
+    .toItem([toItemDurationEntity, toItemQuantityEntity])
+    .build();
 
     try {
       const result = await serviceOrderApi

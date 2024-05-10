@@ -34,7 +34,7 @@
   },
   "cds": {
     "requires": {
-      "[production]": {
+      "[development]": {
         "db": "hana"
       },
       "app-service": {

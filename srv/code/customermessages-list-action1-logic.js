@@ -21,7 +21,7 @@ module.exports = async function(request) {
         JSON template: {titleEnglish: Text, summaryEnglish: Text, fullMessageEnglish: Text}
         `;
 
-        const tranlationJSON = await lLMProxy(request, promt);
+        const tranlationJSON = await lLMProxy.completion(request, promt, process.env.gpt35TurboEndpoint);
 
         const titleEnglish = tranlationJSON["titleEnglish"];
         console.log(`titleEnglish ${titleEnglish}`)
