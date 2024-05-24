@@ -5,15 +5,17 @@ const lLMProxy = require('./genAIHubProxyDirect');
  * @On(event = { "Action3" }, entity = "productSupportSrv.CustomerMessages")
  * @param {Object} request - User information, tenant-specific CDS model, headers and query parameters
 */
-module.exports = async function(request) {
-    const { ID } = request._params[0];
-    const CustomerMessages = await SELECT.one.from('productSupportSrv.CustomerMessages').where({ ID: ID });
-
-    const titleOriginal = CustomerMessages.messageTitleCustomerLanguage;
-    const summaryOriginal = CustomerMessages.summaryCustomerLanguage;
-    const fullMessageOriginal = CustomerMessages.fullMessageTextCustomerLanguage;
-
+module.exports = async function (request) {
     try {
+        //request._params[0]
+        const ID = request._params[0];
+        const customerMessages = await SELECT.one.from('productSupportSrv.CustomerMessages').where({ ID: ID });
+
+        const titleOriginal = customerMessages.messageTitleCustomerLanguage;
+        const summaryOriginal = customerMessages.summaryCustomerLanguage;
+        const fullMessageOriginal = customerMessages.fullMessageTextCustomerLanguage;
+
+
         const promt = `Translate titleOriginal and summaryOriginal and fullMessageOriginal to English and return the result in the provided JSON template below:
         titleOriginal: ${titleOriginal}
         summaryOriginal: ${summaryOriginal}
@@ -21,20 +23,20 @@ module.exports = async function(request) {
         JSON template: {titleEnglish: Text, summaryEnglish: Text, fullMessageEnglish: Text}
         `;
 
-        const tranlationJSON = await lLMProxy.completion(request, promt, process.env.gpt35TurboEndpoint);
-
-        const titleEnglish = tranlationJSON["titleEnglish"];
+        const translationRaw = await lLMProxy.completion(request, promt, process.env.gpt35TurboEndpoint);
+        const translationJSON = JSON.parse(translationRaw);
+        const titleEnglish = translationJSON["titleEnglish"];
         console.log(`titleEnglish ${titleEnglish}`)
-        const summaryEnglish = tranlationJSON["summaryEnglish"];
+        const summaryEnglish = translationJSON["summaryEnglish"];
         console.log(`summaryEnglish ${summaryEnglish}`)
-        const fullMessageEnglish = tranlationJSON["fullMessageEnglish"];
+        const fullMessageEnglish = translationJSON["fullMessageEnglish"];
         console.log(`fullMessageEnglish ${fullMessageEnglish}`)
 
-        if (CustomerMessages) {
+        if (customerMessages) {
             await UPDATE('productSupportSrv.CustomerMessages')
                 .set({ title: titleEnglish })
                 .set({ summary: summaryEnglish })
-                .set({ fullMessageTextEnglish: fullMessageEnglish})
+                .set({ fullMessageTextEnglish: fullMessageEnglish })
                 .where({ ID: ID });
             console.log(`CustomerMessages with ID ${ID} updated`);
         } else {

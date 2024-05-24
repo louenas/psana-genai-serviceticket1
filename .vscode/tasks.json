@@ -170,6 +170,53 @@
       }
     },
     {
+      "label": "DeployToHANADB:.env2",
+      "type": "shell",
+      "command": "eval $(cat ${workspaceFolder}/env/.env2) cds deploy --to hana --auto-undeploy",
+      "options": {
+        "cwd": "${workspaceFolder}/"
+      }
+    },
+    {
+      "label": "PreLaunchTask for Env 2 S4HCP-ServiceOrder-Odata",
+      "type": "process",
+      "command": "npx",
+      "args": [
+        "dev-cap-tools",
+        "gen-entrypoint"
+      ],
+      "dependsOn": [
+        "BuildMDK",
+        "DeployToHANADB:.env2"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "DeployToHANADB:.env1",
+      "type": "shell",
+      "command": "eval $(cat ${workspaceFolder}/env/.env1) cds deploy --to hana --auto-undeploy",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "PreLaunchTask for Env1 Run s4hcserviceticketassistant1",
+      "type": "process",
+      "command": "npx",
+      "args": [
+        "dev-cap-tools",
+        "gen-entrypoint"
+      ],
+      "dependsOn": [
+        "BuildMDK"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
       "label": "PreLaunchTask for Env4 Run s4hcserviceticketassistant1-live-hana",
       "type": "process",
       "command": "npx",
@@ -180,6 +227,45 @@
       "dependsOn": [
         "BuildMDK",
         "DeployToHANADB:.env4"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "DeployToHANADB:.env5",
+      "type": "shell",
+      "command": "eval $(cat ${workspaceFolder}/env/.env5) cds deploy --to hana --auto-undeploy",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "PreLaunchTask for Run s4hcserviceticketassistant1-5",
+      "type": "process",
+      "command": "npx",
+      "args": [
+        "dev-cap-tools",
+        "gen-entrypoint"
+      ],
+      "dependsOn": [
+        "BuildMDK",
+        "DeployToHANADB:.env5"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "PreLaunchTask for Env3 Run s4hcserviceticketassistant1-livedata",
+      "type": "process",
+      "command": "npx",
+      "args": [
+        "dev-cap-tools",
+        "gen-entrypoint"
+      ],
+      "dependsOn": [
+        "BuildMDK"
       ],
       "options": {
         "cwd": "${workspaceFolder}"

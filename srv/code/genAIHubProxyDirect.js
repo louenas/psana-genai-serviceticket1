@@ -57,7 +57,7 @@ completion = async function (req, prompt, llmEndpoint) {
     const results = await axios(config);
     console.log('Response: ', results);
     //.content should be a string form of a Json object
-    var res = JSON.parse(results.data?.choices[0]?.message?.content);
+    var res = results.data?.choices[0]?.message?.content;
     return res;
   } catch (error) {
     console.error('Error: ', error);

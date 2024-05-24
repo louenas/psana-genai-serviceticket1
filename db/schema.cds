@@ -18,16 +18,18 @@ entity CustomerMessages
     summaryCustomerLanguage : String(500);
     originatingCountry : String(50);
     sourceLanguage : String(50);
-    fullMessageTextCustomerLanguage : String(1000);
-    fullMessageTextEnglish : String(1000);
-    suggestedResponseTextEnglish : String(1000);
-    suggestedResponseTextCustomerLanguage : String(1000);
+    fullMessageTextCustomerLanguage : String(5000);
+    fullMessageTextEnglish : String(5000);
+    suggestedResponseTextEnglish : String(5000);
+    suggestedResponseTextCustomerLanguage : String(5000);
     a_ServiceOrder : Association to one S4HCP_ServiceOrder_Odata.A_ServiceOrder;
 }
 
-entity ServiceOrderData { 
-  SOID  : String (10);
-  SOTitle : LargeString;
-  SOInfo  : LargeString;  
-  embedding : Vector(1536); // vector space w/ 1536 dimensions
-} 
+entity ProductFAQ
+{
+    key ID : Integer;
+    issue : LargeString;
+    question : LargeString;
+    answer : LargeString;
+    embedding : Vector(1536); // vector space w/ 1536 dimensions
+}
