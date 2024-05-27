@@ -2,7 +2,7 @@ const lLMProxy = require('./genAIHubProxyDirect');
 const { serviceOrderService } = require("@sap/cloud-sdk-vdm-service-order-service");
 
 /**
- * 
+ * Create Service Order in S/4HANA Cloud
  * @On(event = { "Action2" }, entity = "productSupportSrv.CustomerMessages")
  * @param {Object} request - User information, tenant-specific CDS model, headers and query parameters
 */

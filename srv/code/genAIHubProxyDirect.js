@@ -4,56 +4,57 @@ const qs = require('qs');
 let genAIHubAccessToken;
 
 async function getAccessToken() {
-  const tokenConfig = {
-    method: 'post',
-    url: process.env.genAITokenURL,
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    data: qs.stringify({
-      grant_type: 'client_credentials',
-      client_id: process.env.genAICliemntID,
-      client_secret: process.env.genAIClientSecret
-    })
-  };
-
   try {
+    const tokenConfig = {
+      method: 'post',
+      url: process.env.genAITokenURL,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      data: qs.stringify({
+        grant_type: 'client_credentials',
+        client_id: process.env.genAICliemntID,
+        client_secret: process.env.genAIClientSecret
+      })
+    };
+
     const response = await axios(tokenConfig);
     return response.data.access_token;
   } catch (error) {
     console.error('Error obtaining access token:', error);
-    return null;
+    throw error; // Propagate the error
   }
 }
-completion = async function (req, prompt, llmEndpoint) {
 
-  genAIHubAccessToken = genAIHubAccessToken || await getAccessToken();
-  if (!genAIHubAccessToken) return;
-
-  const postData = {
-    "messages": [
-      {
-        "role": "user",
-        "content": prompt
-      }
-    ],
-    "max_tokens": 1000,
-    "temperature": 0.1,
-    "frequency_penalty": 0,
-    "presence_penalty": 0
-  };
-
-  const config = {
-    method: 'post',
-    url: process.env.genAIModelDeploymentRootURL + llmEndpoint,
-    headers: {
-      'Authorization': `Bearer ${genAIHubAccessToken}`,
-      'AI-Resource-Group': 'default'
-    },
-    data: postData
-  };
-
+const completion = async function (req, prompt, llmEndpoint) {
   try {
+    genAIHubAccessToken = genAIHubAccessToken || await getAccessToken();
+    if (!genAIHubAccessToken) 
+      throw new Error('Error obtaining GenAIHub access token');
+
+    const postData = {
+      "messages": [
+        {
+          "role": "user",
+          "content": prompt
+        }
+      ],
+      "max_tokens": 2000,
+      "temperature": 0.1,
+      "frequency_penalty": 0,
+      "presence_penalty": 0
+    };
+
+    const config = {
+      method: 'post',
+      url: process.env.genAIModelDeploymentRootURL + llmEndpoint,
+      headers: {
+        'Authorization': `Bearer ${genAIHubAccessToken}`,
+        'AI-Resource-Group': 'default'
+      },
+      data: postData
+    };
+
     const results = await axios(config);
     console.log('Response: ', results);
     //.content should be a string form of a Json object
@@ -62,11 +63,10 @@ completion = async function (req, prompt, llmEndpoint) {
   } catch (error) {
     console.error('Error: ', error);
     req.error(error.code, error.message);
-    throw error; // Propagate the error
   }
 }
 
-embed = async function(req, text, llmEndpoint){
+const embed = async function (req, text, llmEndpoint) {
   genAIHubAccessToken = genAIHubAccessToken || await getAccessToken();
   if (!genAIHubAccessToken) return;
 
@@ -92,7 +92,6 @@ embed = async function(req, text, llmEndpoint){
   } catch (error) {
     console.error('Error: ', error);
     req.error(error.code, error.message);
-    throw error; // Propagate the error
   }
 }
 
