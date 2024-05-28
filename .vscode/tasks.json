@@ -41,44 +41,6 @@
       }
     },
     {
-      "label": "install-app-router",
-      "type": "shell",
-      "command": "if [ ! -d node_modules ]; then npm i; fi",
-      "options": {
-        "cwd": "${workspaceFolder}///local-router"
-      }
-    },
-    {
-      "label": "start-app-router",
-      "type": "shell",
-      "command": "eval $(cat ../env/.envXsuaa)  npm start",
-      "options": {
-        "cwd": "${workspaceFolder}///local-router"
-      },
-      "dependsOn": [
-        "install-app-router"
-      ],
-      "isBackground": true,
-      "problemMatcher": [
-        {
-          "severity": "info",
-          "pattern": [
-            {
-              "regexp": ".*Application router is listening on port.*",
-              "file": 0,
-              "location": 0,
-              "message": 0
-            }
-          ],
-          "background": {
-            "activeOnStart": true,
-            "beginsPattern": ".",
-            "endsPattern": ".*Application router is listening on port.*"
-          }
-        }
-      ]
-    },
-    {
       "label": "PreLaunchTask for S4HCP-ServiceOrder-Odata",
       "type": "process",
       "command": "npx",
@@ -217,22 +179,6 @@
       }
     },
     {
-      "label": "PreLaunchTask for Env4 Run s4hcserviceticketassistant1-live-hana",
-      "type": "process",
-      "command": "npx",
-      "args": [
-        "dev-cap-tools",
-        "gen-entrypoint"
-      ],
-      "dependsOn": [
-        "BuildMDK",
-        "DeployToHANADB:.env4"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      }
-    },
-    {
       "label": "DeployToHANADB:.env5",
       "type": "shell",
       "command": "eval $(cat ${workspaceFolder}/env/.env5) cds deploy --to hana --auto-undeploy",
@@ -266,6 +212,60 @@
       ],
       "dependsOn": [
         "BuildMDK"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "install-app-router",
+      "type": "shell",
+      "command": "if [ ! -d node_modules ]; then npm i; fi",
+      "options": {
+        "cwd": "${workspaceFolder}/local-router"
+      }
+    },
+    {
+      "label": "start-app-router",
+      "type": "shell",
+      "command": "eval $(cat ../env/.envXsuaa)  npm start",
+      "options": {
+        "cwd": "${workspaceFolder}/local-router"
+      },
+      "dependsOn": [
+        "install-app-router"
+      ],
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "severity": "info",
+          "pattern": [
+            {
+              "regexp": ".*Application router is listening on port.*",
+              "file": 0,
+              "location": 0,
+              "message": 0
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": ".*Application router is listening on port.*"
+          }
+        }
+      ]
+    },
+    {
+      "label": "PreLaunchTask for Env4 Run s4hcserviceticketassistant1-live-hana",
+      "type": "process",
+      "command": "npx",
+      "args": [
+        "dev-cap-tools",
+        "gen-entrypoint"
+      ],
+      "dependsOn": [
+        "BuildMDK",
+        "DeployToHANADB:.env4"
       ],
       "options": {
         "cwd": "${workspaceFolder}"

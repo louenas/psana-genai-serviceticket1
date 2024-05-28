@@ -51,9 +51,18 @@
       "S4HCP_ServiceOrder_Odata": {
         "kind": "odata-v2",
         "model": "srv/external/S4HCP_ServiceOrder_Odata",
-        "[production]": {
+        "[development]": {
           "credentials": {
             "destination": "S4HCP-ServiceOrder-Odata"
+          }
+        }
+      },
+      "S4HCP_ServiceOrder_Odata_Clone": {
+        "kind": "odata-v2",
+        "model": "srv/external/S4HCP_ServiceOrder_Odata",
+        "[development]": {
+          "credentials": {
+            "destination": "S4HCP-ServiceOrder-Odata_Clone"
           }
         }
       },

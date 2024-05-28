@@ -8,9 +8,9 @@ const { serviceOrderService } = require("@sap/cloud-sdk-vdm-service-order-servic
 */
 module.exports = async function (request) {
   try {
-    const ID  = request._params[0];
+    const ID = request._params[0];
 
-    const customerMessage = await SELECT.one.from('productSupportSrv.CustomerMessages').where({ ID: ID });
+    const customerMessage = await SELECT.one.from('productSupport.CustomerMessages').where({ ID: ID });
 
     const titleOriginal = customerMessage.messageTitleCustomerLanguage;
     const summaryOriginal = customerMessage.summaryCustomerLanguage;
@@ -70,38 +70,28 @@ module.exports = async function (request) {
       .toItem([toItemDurationEntity, toItemQuantityEntity])
       .build();
 
-    try {
-      const result = await serviceOrderApi
-        .requestBuilder()
-        .create(serviceOrderEntiry)
-        .execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
+    const result = await serviceOrderApi
+      .requestBuilder()
+      .create(serviceOrderEntiry)
+      .execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
 
-      const soResult = result.toJSON();
-      const soId = soResult.serviceOrder;
-      console.log("Sales Order Id: ", soId);
+    const soResult = result.toJSON();
+    const soId = soResult.serviceOrder;
+    console.log(`Created Service Order with ID: ${soId}`);
 
-      await UPDATE('productSupportSrv.CustomerMessages')
-        .set({ a_ServiceOrder_ServiceOrder: soId })
-        .where({ ID: ID });
+    await UPDATE('productSupport.CustomerMessages')
+      .set({ a_ServiceOrder_ServiceOrder: soId })
+      .where({ ID: ID });
 
-      console.log(`Service Order ${soId} created. CustomerMessage with ID ${ID} updated.`);
+    console.log(`CustomerMessage with ID ${ID} updated.`);
 
-    } catch (oDataErr) {
-      console.error(JSON.stringify(oDataErr));
-
-      message = oDataErr.rootCause?.message;
-      request.error({
-        code: "Error in S4HC Sales Order OData Call",
-        message: message,
-        target: "",
-        status: 500,
-      });
-    }
   } catch (err) {
-    console.error(err.message);
+    console.error(JSON.stringify(err));
+
+    message = err.rootCause?.message;
     request.error({
-      code: "Error creating Service Order and/or updating customer message",
-      message: err.message,
+      code: "",
+      message: message,
       target: "",
       status: 500,
     });

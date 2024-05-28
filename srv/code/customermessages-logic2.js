@@ -15,6 +15,6 @@ module.exports = async function(request) {
             console.log(`A customer message with ID ${request.data.ID} has been deleted.`);
             break;
         default:
-            console.log('Unknown event');
+            console.error('Unknown event');
     }
 }

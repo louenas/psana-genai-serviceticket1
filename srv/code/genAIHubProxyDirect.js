@@ -61,7 +61,7 @@ const completion = async function (req, prompt, llmEndpoint) {
     var res = results.data?.choices[0]?.message?.content;
     return res;
   } catch (error) {
-    console.error('Error: ', error);
+    console.error('Error: ', JSON.stringify(error));
     req.error(error.code, error.message);
   }
 }
@@ -90,7 +90,7 @@ const embed = async function (req, text, llmEndpoint) {
     var res = results.data?.data[0]?.embedding;
     return res;
   } catch (error) {
-    console.error('Error: ', error);
+    console.error('Error: ', JSON.stringify(error));
     req.error(error.code, error.message);
   }
 }

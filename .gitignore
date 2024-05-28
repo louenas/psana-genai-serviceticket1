@@ -38,4 +38,5 @@ build/ui-deployer/
 build/dist/
 env/
 
-app/s4hcserviceticketassistant1.S4HCServiceOrderIntelligence/dist-zip/s4hcserviceticketassistant1S4HCServiceOrderIntelligence.zip
+dist-zip/
+build/

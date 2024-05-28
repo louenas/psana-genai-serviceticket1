@@ -1,4 +1,3 @@
-const { foreach } = require('@sap/cds');
 const { serviceOrderService } = require("@sap/cloud-sdk-vdm-service-order-service");
 const lLMProxy = require('./genAIHubProxyDirect');
 
@@ -9,99 +8,75 @@ const lLMProxy = require('./genAIHubProxyDirect');
 */
 module.exports = async function (request) {
     try {
-        const ID  = request._params[0];
+        const ID = request._params[0];
 
-        const customerMessage = await SELECT.one.from('productSupportSrv.CustomerMessages').where({ ID: ID });
+        const customerMessage = await SELECT.one.from('productSupport.CustomerMessages').where({ ID: ID });
         const attachedSO = customerMessage.a_ServiceOrder_ServiceOrder;
-        let soContext;
-        if (true) {
-            const { serviceOrderApi, serviceOrderTextApi, serviceOrderItemApi, serviceOrderPersonRespApi } = serviceOrderService();
+        let soContext = "";
 
+        if (attachedSO) {
+            const { serviceOrderApi } = serviceOrderService();
             //const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata' });
-            const result = await serviceOrderApi.requestBuilder().getByKey('8000000122').select(
+            //const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
+            const result = await serviceOrderApi.requestBuilder().getByKey(attachedSO).select(
                 serviceOrderApi.schema.ALL_FIELDS,
-                serviceOrderApi.schema.TO_ITEM,
-                serviceOrderApi.schema.TO_TEXT,
-                serviceOrderApi.schema.TO_PERSON_RESPONSIBLE
+                serviceOrderApi.schema.TO_TEXT
             ).execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
 
-            const serviceOrderDescription = result.serviceOrderDescription;
-            const concatenatedongText = result.toText.map(item => 
+            soContext = result.toText.map(item =>
                 `${item.longText}`).join(' ');
-            const soContext = serviceOrderDescription +" "+ concatenatedongText;
         }
 
         const fullMessageCustomerLang = customerMessage.fullMessageTextCustomerLanguage;
+        const customerMessageCategory = customerMessage.category;
+        const customerMessageSentiment = customerMessage.sentiment;
+        let replyPrompt = "";
+        let messageType = "";
 
-        let fullMessageCustomerLangEmbedding = await lLMProxy.embed(request, fullMessageCustomerLang, process.env.textEmbeddingAda002Endpoint);
-        let fullMessageCustomerLangEmbeddingStr = JSON.stringify(fullMessageCustomerLangEmbedding);
-        let releventFAQs = await SELECT `id, issue, question, answer` .from('productSupport.ProductFAQ') .where `cosine_similarity(embedding, to_real_vector(${fullMessageCustomerLangEmbeddingStr})) > 0.7`;
-        console.log(`similar FAQs: ${releventFAQs[0].issue} ${releventFAQs[0].question}`);
+        switch (customerMessageCategory) {
+            case "Technical":
+                messageType = "a helpfull message including the troubleshooting procedure"
+                let fullMessageCustomerLangEmbedding = await lLMProxy.embed(request, fullMessageCustomerLang, process.env.textEmbeddingAda002Endpoint);
+                let fullMessageCustomerLangEmbeddingStr = JSON.stringify(fullMessageCustomerLangEmbedding);
+                let releventFAQs = await SELECT`id, issue, question, answer`.from('productSupport.ProductFAQ').where`cosine_similarity(embedding, to_real_vector(${fullMessageCustomerLangEmbeddingStr})) > 0.7`;
+                console.log(`similar FAQs: ${releventFAQs[0]?.issue} ${releventFAQs[0]?.question}`);
 
-        let troubleshootingReplyPrompt = `generate a reply to the newCustomerMessage based on previousCustomerMessages and releventFAQItem: newCustomerMessage: ${fullMessageCustomerLang}`;
-        if(soContext) troubleshootingReplyPrompt += `previousCustomerMessages: ${soContext}`;
-        troubleshootingReplyPrompt += `releventFAQItem: ${releventFAQs[0].question + " " + releventFAQs[0].answer}`;
+                replyPrompt = `generate ${messageType} to the newCustomerMessage based on previousCustomerMessages and releventFAQItem: newCustomerMessage: ${fullMessageCustomerLang}`;
+                if (soContext) replyPrompt += `previousCustomerMessages: ${soContext}`;
+                replyPrompt += `releventFAQItem: ${releventFAQs[0]?.question + " " + releventFAQs[0]?.answer}`;
 
-        const troubleshootingReply = await lLMProxy.completion(request, troubleshootingReplyPrompt, process.env.gpt35TurboEndpoint);
+                break;
 
-        await UPDATE('productSupportSrv.CustomerMessages')
-                .set({ suggestedResponseTextEnglish: troubleshootingReply })
-                .where({ ID: ID });
-                
+            default:
+                if (customerMessageSentiment == "Negative") {
+                    messageType = "a 'we are sorry' note"
+                } else {
+                    messageType = "a gratitude note"
+                }
+
+                replyPrompt = `generate ${messageType} to the newCustomerMessage based on previousCustomerMessages: newCustomerMessage: ${fullMessageCustomerLang}`;
+                if (soContext) replyPrompt += `previousCustomerMessages: ${soContext}`;
+
+                break;
+        }
+
+        const replyBoby = await lLMProxy.completion(request, replyPrompt, process.env.gpt35TurboEndpoint);
+
+        await UPDATE('productSupport.CustomerMessages')
+            .set({ suggestedResponseTextEnglish: replyBoby })
+            .where({ ID: ID });
+
         console.log(`CustomerMessages with ID ${ID} updated with a reply to the customer.`);
 
-    } catch (error) {
-        console.error('Error:', error.message);
-        request.error(error.code, error.message);
+    } catch (err) {
+        console.error(JSON.stringify(err));
+
+        message = err.rootCause?.message;
+        request.error({
+            code: "",
+            message: message,
+            target: "",
+            status: 500,
+        });
     }
 }
-
-// /**
-//  * @On(event = { "Action1" }, entity = "productSupportSrv.CustomerMessages")
-//  * @param {Object} request - User information, tenant-specific CDS model, headers and query parameters
-// */
-// module.exports = async function (request) {
-//     const { ID } = request._params[0];
-//     try {
-        
-//         const { serviceOrderApi, serviceOrderTextApi, serviceOrderItemApi, serviceOrderPersonRespApi } = serviceOrderService();
-
-//         //const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata' });
-//         const result = await serviceOrderApi.requestBuilder().getByKey('8000000122').select(
-//             serviceOrderApi.schema.ALL_FIELDS,
-//             serviceOrderApi.schema.TO_ITEM,
-//             serviceOrderApi.schema.TO_TEXT,
-//             serviceOrderApi.schema.TO_PERSON_RESPONSIBLE
-//         ).execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
-//         console.log(result);
-
-//         let concatenatedHeader = result.serviceOrder +" "+ result.serviceOrderType +" "+ result.purchaseOrderByCustomer +" "+ result.serviceOrderDescription;
-
-//         const concatenatedDescriptions = result.toText.map(item => `${item.serviceOrderItemDescription}`).join(' ');
-
-//         result.toText[0].language +" "+ result.toText[0].longTextID +" "+ result.toText[0].longText;
-
-//         const concatenatedText = result.toText.map(item => `${item.language} ${item.longTextID} ${item.longText}`).join(' ');
-
-//         const info = concatenatedHeader +" "+ concatenatedDescriptions +" "+ concatenatedText;
-
-//         let embedding = await lLMProxy.embed(request, info , process.env.textEmbeddingAda002Endpoint);
-
-//         const embeddingBinnary = array2VectorBuffer(embedding);
-//         await INSERT({soid: result.serviceOrder, sotitle: result.serviceOrderDescription, soinfo: info, embedding: embeddingBinnary, }).into('productSupport.ServiceOrderData');
-//         //await UPDATE ("productSupport.ServiceOrderData").set({SOID:result.serviceOrder, SOTITLE: result.serviceOrderDescription, SOINFO: info, embedding: embeddingBinnary, }).where({SOID: result.serviceOrder})
-
-//         let prompt = "8000000122 SVO1 WHIR-LW-176532";
-//         let promptEmbedding = await lLMProxy.embed(request, prompt, process.env.textEmbeddingAda002Endpoint);
-//         let promptEmbeddingStr = JSON.stringify(promptEmbedding);
-//         let similarSO = await SELECT `soid, sotitle` .from('productSupport.ServiceOrderData') .where `cosine_similarity(embedding, to_real_vector(${promptEmbeddingStr})) > 0.2`;
-//         console.log(`similar SO: ${similarSO[0].soid} ${similarSO[0].sotitle}`);
-
-//         console.log("done");
-//         //let similarBooks = await SELECT.from('productSupport.Books').where`cosine_similarity(embedding, to_real_vector(${embedding})) > 0.9`
-
-//     } catch (error) {
-//         console.error('Error:', error.message);
-//         request.error(error.code, error.message);
-//     }
-//}

@@ -5,7 +5,7 @@ using { productSupport } from '../db/schema.cds';
 @path : '/service/productSupport'
 service productSupportSrv
 {
-    @odata.draft.enabled
+    //@odata.draft.enabled
     entity CustomerMessages as
         projection on productSupport.CustomerMessages
         actions
