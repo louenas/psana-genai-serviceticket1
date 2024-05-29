@@ -3,6 +3,7 @@
  * @version(2.0)
  */
 const LCAPApplicationService = require('@sap/low-code-event-handler');
+
 const customermessages_Logic1 = require('./code/customermessages-logic1');
 const customermessages_Logic2 = require('./code/customermessages-logic2');
 const customermessages_Action1_Logic = require('./code/customermessages-action1-logic');

@@ -1,5 +1,5 @@
 {
   "ProjectOverviewURL": "https://xym1kl6-km83prdb.launchpad.cfapps.us10.hana.ondemand.com/lcaps4hcserviceticketassistant1.s4hcserviceticketassistant1Launchpad-1.0.0",
-  "DeployedUTCTime": "2024-05-22T17:13:20.488Z",
+  "DeployedUTCTime": "2024-05-29T13:55:46.900Z",
   "ApplicationLogURL": "https://logs.cf.us10-001.hana.ondemand.com/app/dashboards#/view/Overview?_g=(filters:!((query:(match_phrase:(component_name:s4hcserviceticketassistant1-srv)))))"
 }

@@ -1,10 +1,7 @@
 const axios = require('axios');
 
-const openAiApiUrl = 'https://api.openai.com/v1/chat/completions';
-const apiKey = 'XXXX';
-
 const headers = {
-    'Authorization': `Bearer ${apiKey}`,
+    'Authorization': `Bearer ${process.env.openAiApiKey}`,
     'Content-Type': 'application/json',
 };
 
@@ -23,7 +20,7 @@ module.exports =  async function (req,prompt) {
   };
 
   try {
-    const response = await axios.post(openAiApiUrl, data, { headers });
+    const response = await axios.post(process.env.openAiApiUrl, data, { headers });
     console.log('Response: ', JSON.stringify(response.data.choices[0]));
     const result = response.data.choices[0].message.content;
     return JSON.parse(result);
