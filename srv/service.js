@@ -15,10 +15,12 @@ class productSupportSrv extends LCAPApplicationService {
 
         this.after('READ', 'CustomerMessages', async (results, request) => {
             await customermessages_Logic1(results, request);
+            //TODO why no next()
         });
 
         this.on(['CREATE', 'DELETE', 'UPDATE'], 'CustomerMessages', async (request, next) => {
             await customermessages_Logic2(request);
+            // what is next(). should it be be passed to the handler
             return next();
         });
 

@@ -1,30 +1,35 @@
-const { serviceOrderService } = require("@sap/cloud-sdk-vdm-service-order-service");
+const { s4HcpServiceOrderOdata } = require('../external/odata-client/S4HCP_ServiceOrder_Odata');
 const lLMProxy = require('./genAIHubProxyDirect');
 
 /**
- * generate troubleshooting response out of FAQ embeeding and a template
+ * Function to generate a troubleshooting response from FAQ embedding and a template
  * @On(event = { "Action1" }, entity = "productSupportSrv.CustomerMessages")
  * @param {Object} request - User information, tenant-specific CDS model, headers and query parameters
 */
 module.exports = async function (request) {
     try {
+        // Extract the customer message ID from the request parameters
         const ID = request._params[0];
 
+        // Fetch the customer message from the database using the ID
         const customerMessage = await SELECT.one.from('productSupport.CustomerMessages').where({ ID: ID });
         const attachedSO = customerMessage.a_ServiceOrder_ServiceOrder;
         let soContext = "";
 
+        // If there is an attached service order, fetch its details
         if (attachedSO) {
-            const { serviceOrderApi } = serviceOrderService();
-            //const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata' });
-            //const result = await serviceOrderApi.requestBuilder().getAll().top(5).execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
-            const result = await serviceOrderApi.requestBuilder().getByKey(attachedSO).select(
-                serviceOrderApi.schema.ALL_FIELDS,
-                serviceOrderApi.schema.TO_TEXT
-            ).execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
+            const { serviceOrderApi } = s4HcpServiceOrderOdata();
+            const result = await serviceOrderApi
+                .requestBuilder()
+                .getByKey(attachedSO)
+                .select(
+                    serviceOrderApi.schema.ALL_FIELDS,
+                    serviceOrderApi.schema.TO_TEXT
+                )
+                .execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
 
-            soContext = result.toText.map(item =>
-                `${item.longText}`).join(' ');
+            // Extract the long text from the service order and join it into a single string
+            soContext = result.toText.map(item => `${item.longText}`).join(' ');
         }
 
         const fullMessageCustomerLang = customerMessage.fullMessageTextCustomerLanguage;
@@ -33,37 +38,40 @@ module.exports = async function (request) {
         let replyPrompt = "";
         let messageType = "";
 
+        // Determine the type of message to generate based on the category and sentiment
         switch (customerMessageCategory) {
             case "Technical":
-                messageType = "a helpfull message including the troubleshooting procedure"
+                messageType = "a helpful message including the troubleshooting procedure";
+                // Embed the customer message to find relevant FAQs
                 let fullMessageCustomerLangEmbedding = await lLMProxy.embed(request, fullMessageCustomerLang, process.env.textEmbeddingAda002Endpoint);
                 let fullMessageCustomerLangEmbeddingStr = JSON.stringify(fullMessageCustomerLangEmbedding);
-                let releventFAQs = await SELECT`id, issue, question, answer`.from('productSupport.ProductFAQ').where`cosine_similarity(embedding, to_real_vector(${fullMessageCustomerLangEmbeddingStr})) > 0.7`;
-                console.log(`similar FAQs: ${releventFAQs[0]?.issue} ${releventFAQs[0]?.question}`);
+                let relevantFAQs = await SELECT`id, issue, question, answer`.from('productSupport.ProductFAQ').where`cosine_similarity(embedding, to_real_vector(${fullMessageCustomerLangEmbeddingStr})) > 0.7`;
+                console.log(`similar FAQs: ${relevantFAQs[0]?.issue} ${relevantFAQs[0]?.question}`);
 
-                replyPrompt = `generate ${messageType} to the newCustomerMessage based on previousCustomerMessages and releventFAQItem: newCustomerMessage: ${fullMessageCustomerLang}`;
+                replyPrompt = `generate ${messageType} to the newCustomerMessage based on previousCustomerMessages and relevantFAQItem: newCustomerMessage: ${fullMessageCustomerLang}`;
                 if (soContext) replyPrompt += `previousCustomerMessages: ${soContext}`;
-                replyPrompt += `releventFAQItem: ${releventFAQs[0]?.question + " " + releventFAQs[0]?.answer}`;
-
+                replyPrompt += `relevantFAQItem: ${relevantFAQs[0]?.question + " " + relevantFAQs[0]?.answer}`;
                 break;
 
             default:
+                // Generate a different prompts type based on the sentiment
                 if (customerMessageSentiment == "Negative") {
-                    messageType = "a 'we are sorry' note"
+                    messageType = "a 'we are sorry' note";
                 } else {
-                    messageType = "a gratitude note"
+                    messageType = "a gratitude note";
                 }
 
                 replyPrompt = `generate ${messageType} to the newCustomerMessage based on previousCustomerMessages: newCustomerMessage: ${fullMessageCustomerLang}`;
                 if (soContext) replyPrompt += `previousCustomerMessages: ${soContext}`;
-
                 break;
         }
 
-        const replyBoby = await lLMProxy.completion(request, replyPrompt, process.env.gpt35TurboEndpoint);
+        // Generate the reply body
+        const replyBody = await lLMProxy.completion(request, replyPrompt, process.env.gpt35TurboEndpoint);
 
+        // Update the customer message in the database with the generated reply
         await UPDATE('productSupport.CustomerMessages')
-            .set({ suggestedResponseTextEnglish: replyBoby })
+            .set({ suggestedResponseTextEnglish: replyBody })
             .where({ ID: ID });
 
         console.log(`CustomerMessages with ID ${ID} updated with a reply to the customer.`);
@@ -71,7 +79,7 @@ module.exports = async function (request) {
     } catch (err) {
         console.error(JSON.stringify(err));
 
-        message = err.rootCause?.message;
+        let message = err.rootCause?.message;
         request.error({
             code: "",
             message: message,

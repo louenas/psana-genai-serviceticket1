@@ -74,7 +74,7 @@
       "envFile": "${workspaceFolder}/env/.env4",
       "env": {
         "run.config": "{\"handlerId\":\"lcap_run_config_handler_id\",\"runnableId\":\"{\\\"projectPath\\\":\\\"/home/user/projects/s4hcserviceticketassistant1\\\",\\\"profileName\\\":\\\"\\\"}\"}",
-        "runConfigurations": "{\"odataBinding\":{\"S4HCP_ServiceOrder_Odata\":{\"destination\":\"S4HCP-ServiceOrder-Odata\",\"type\":\"Destination\",\"path\":\"\"}},\"dbBinding\":{\"type\":\"SAP HANA Cloud\",\"dbName\":\"s4hcserviceticketassistant1-db\"}}"
+        "runConfigurations": "{\"odataBinding\":{\"S4HCP_ServiceOrder_Odata\":{\"destination\":\"S4HCP-ServiceOrder-Odata\",\"type\":\"Destination\",\"path\":\"\"},\"S4HCP_ServiceOrder_Odata_Clone\":{\"destination\":\"S4HCP-ServiceOrder-Odata\",\"type\":\"Destination\",\"path\":\"\"}},\"dbBinding\":{\"type\":\"SAP HANA Cloud\",\"dbName\":\"s4hcserviceticketassistant1-db\"}}"
       }
     }
   ]

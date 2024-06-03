@@ -20,9 +20,9 @@ async function getAccessToken() {
 
     const response = await axios(tokenConfig);
     return response.data.access_token;
-  } catch (error) {
-    console.error('Error obtaining access token:', error);
-    throw error; // Propagate the error
+  } catch (err) {
+    console.error('Error obtaining access token:', err);
+    throw err; // Propagate the error
   }
 }
 
@@ -60,9 +60,9 @@ const completion = async function (req, prompt, llmEndpoint) {
     //.content should be a string form of a Json object
     var res = results.data?.choices[0]?.message?.content;
     return res;
-  } catch (error) {
-    console.error('Error: ', JSON.stringify(error));
-    req.error(error.code, error.message);
+  } catch (err) {
+    console.error('Error: ', JSON.stringify(err));
+    throw err;
   }
 }
 
@@ -89,9 +89,9 @@ const embed = async function (req, text, llmEndpoint) {
     //.embedding is already a Json object
     var res = results.data?.data[0]?.embedding;
     return res;
-  } catch (error) {
-    console.error('Error: ', JSON.stringify(error));
-    req.error(error.code, error.message);
+  } catch (err) {
+    console.error('Error: ', JSON.stringify(err));
+    throw err;
   }
 }
 

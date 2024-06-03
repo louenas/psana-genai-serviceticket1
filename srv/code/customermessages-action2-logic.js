@@ -1,5 +1,5 @@
 const lLMProxy = require('./genAIHubProxyDirect');
-const { serviceOrderService } = require("@sap/cloud-sdk-vdm-service-order-service");
+const { s4HcpServiceOrderOdata } = require('../external/odata-client/S4HCP_ServiceOrder_Odata');
 
 /**
  * Create Service Order in S/4HANA Cloud
@@ -8,33 +8,40 @@ const { serviceOrderService } = require("@sap/cloud-sdk-vdm-service-order-servic
 */
 module.exports = async function (request) {
   try {
+    // Extract the customer message ID from the request parameters
     const ID = request._params[0];
 
+    // Fetch the customer message from the database using the ID
     const customerMessage = await SELECT.one.from('productSupport.CustomerMessages').where({ ID: ID });
 
-    const titleOriginal = customerMessage.messageTitleCustomerLanguage;
-    const summaryOriginal = customerMessage.summaryCustomerLanguage;
-    const fullMessageOriginal = customerMessage.fullMessageTextCustomerLanguage;
+    // Extract necessary information from the customer message
+    const {
+      messageTitleCustomerLanguage: titleOriginal,
+      summaryCustomerLanguage: summaryOriginal,
+      fullMessageTextCustomerLanguage: fullMessageOriginal,
+      title: titleEnglish,
+      fullMessageTextEnglish,
+      suggestedResponseTextEnglish
+    } = customerMessage;
 
-    const titleEnglish = customerMessage.title;
-    const fullMessageTextEnglish = customerMessage.fullMessageTextEnglish;
-    const suggestedResponseTextEnglish = customerMessage.suggestedResponseTextEnglish;
+    // Destructure service order APIs from the S4HCP service
+    const { serviceOrderApi, serviceOrderTextApi, serviceOrderItemApi, serviceOrderPersonRespApi } = s4HcpServiceOrderOdata();
 
-    const { serviceOrderApi, serviceOrderTextApi, serviceOrderItemApi, serviceOrderPersonRespApi } = serviceOrderService();
-
-    var toTextEntityIntial = serviceOrderTextApi
+    // Build text entities for the service order
+    const toTextEntityInitial = serviceOrderTextApi
       .entityBuilder()
       .language('EN')
       .longText(fullMessageTextEnglish)
       .build();
 
-    var toTextEntityAnswer = serviceOrderTextApi
+    const toTextEntityAnswer = serviceOrderTextApi
       .entityBuilder()
       .language('EN')
       .longText(suggestedResponseTextEnglish)
       .build();
 
-    var toItemDurationEntity = serviceOrderItemApi
+    // Build item entities for the service order
+    const toItemDurationEntity = serviceOrderItemApi
       .entityBuilder()
       .serviceOrderItemDescription('Service Order duration')
       .product('SRV_01')
@@ -42,7 +49,7 @@ module.exports = async function (request) {
       .serviceDurationUnit('HR')
       .build();
 
-    var toItemQuantityEntity = serviceOrderItemApi
+    const toItemQuantityEntity = serviceOrderItemApi
       .entityBuilder()
       .serviceOrderItemDescription('Service Order number')
       .product('SRV_02')
@@ -50,12 +57,14 @@ module.exports = async function (request) {
       .quantityUnit('EA')
       .build();
 
-    var toPersonRespEntity = serviceOrderPersonRespApi
+    // Build person responsible entity for the service order
+    const toPersonRespEntity = serviceOrderPersonRespApi
       .entityBuilder()
       .personResponsible('9980003640')
       .build();
 
-    var serviceOrderEntiry = serviceOrderApi
+    // Build the main service order entity
+    const serviceOrderEntity = serviceOrderApi
       .entityBuilder()
       .serviceOrderType('SVO1')
       .serviceOrderDescription(titleEnglish)
@@ -65,30 +74,32 @@ module.exports = async function (request) {
       .distributionChannel('10')
       .division('00')
       .soldToParty('17100002')
-      .toText([toTextEntityIntial, toTextEntityAnswer])
+      .toText([toTextEntityInitial, toTextEntityAnswer])
       .toPersonResponsible([toPersonRespEntity])
       .toItem([toItemDurationEntity, toItemQuantityEntity])
       .build();
 
+    // Create the service order in S/4HANA Cloud
     const result = await serviceOrderApi
       .requestBuilder()
-      .create(serviceOrderEntiry)
+      .create(serviceOrderEntity)
       .execute({ destinationName: 'S4HCP-ServiceOrder-Odata_Clone' });
 
+    // Extract the service order ID from the result
     const soResult = result.toJSON();
     const soId = soResult.serviceOrder;
     console.log(`Created Service Order with ID: ${soId}`);
 
+    // Update the customer message with the new service order ID
     await UPDATE('productSupport.CustomerMessages')
       .set({ a_ServiceOrder_ServiceOrder: soId })
       .where({ ID: ID });
 
     console.log(`CustomerMessage with ID ${ID} updated.`);
-
   } catch (err) {
     console.error(JSON.stringify(err));
 
-    message = err.rootCause?.message;
+    const message = err.rootCause?.message;
     request.error({
       code: "",
       message: message,

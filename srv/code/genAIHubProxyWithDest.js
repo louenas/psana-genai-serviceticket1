@@ -4,9 +4,6 @@ const xsenv = require("@sap/xsenv");
 
 var genAIAuthToken, genAIAPIURL;
 
-//const genAIModelDeploymentEndpoint = process.env.deploymentUrl;
-const genAIModelDeploymentEndpoint = "/v2/inference/deployments/d2e3b34633808207/chat/completions?api-version=2023-05-15";
-
 getDestination("GENAI_ENABLEMENT_GENAICORE").then((dest) => {
   genAIAuthToken = "Bearer " + dest.authTokens[0].value;
   genAIAPIURL = dest.destinationConfiguration.URL;
@@ -19,7 +16,6 @@ async function getDestination(dest) {
     let services = xsenv.getServices({
       dest: { tag: "destination" },
     });
-    try {
       let options1 = {
         method: "POST",
         url: services.dest.url + "/oauth/token?grant_type=client_credentials",
@@ -32,7 +28,6 @@ async function getDestination(dest) {
         },
       };
       let res1 = await axios(options1);
-      try {
         let options2 = {
           method: "GET",
           url:
@@ -46,17 +41,9 @@ async function getDestination(dest) {
         let res2 = await axios(options2);
         // return res2.data.destinationConfiguration;
         return res2.data;
-      } catch (err) {
-        console.log(err.stack);
-        return err.message;
-      }
-    } catch (err) {
-      console.log(err.stack);
-      return err.message;
-    }
   } catch (err) {
-    console.log(err.stack);
-    return err.message;
+    console.log(JSON.stringify(err));
+    throw err;
   }
 }
 
@@ -90,16 +77,16 @@ module.exports = async function (req, prompt) {
 
     const results = await aicoreAPI
       .tx(req)
-      .send("POST", genAIModelDeploymentEndpoint, data, headers);
+      .send("POST", process.env.gpt35TurboEndpoint, data, headers);
 
     //IMPORTANT - results.choices[0] instead of results.data.choices[0]
-    console.log('##### Response: ', JSON.stringify(results));
+    console.log('GenAI Hub Call Response: ', JSON.stringify(results));
     var res = JSON.parse(results.choices[0].message.content);
 
     return res;
 
-  } catch (error) {
-    req.error(error.code, error.message);
-    throw error; // Propagate the error
+  } catch (err) {
+    console.log(JSON.stringify(err));
+    throw err; // Propagate the error
   }
 }

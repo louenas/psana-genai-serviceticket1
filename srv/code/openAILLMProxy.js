@@ -24,8 +24,8 @@ module.exports =  async function (req,prompt) {
     console.log('Response: ', JSON.stringify(response.data.choices[0]));
     const result = response.data.choices[0].message.content;
     return JSON.parse(result);
-  } catch (error) {
-    console.error('Error:', error.message);
-    throw error; // Propagate the error
+  } catch (err) {
+    console.log(JSON.stringify(err));
+    throw err; // Propagate the error
   }
 }

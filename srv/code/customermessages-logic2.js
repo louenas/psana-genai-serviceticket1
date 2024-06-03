@@ -16,5 +16,11 @@ module.exports = async function(request) {
             break;
         default:
             console.error('Unknown event');
+            request.error({
+                code: "",
+                message: "Unknown event",
+                target: "",
+                status: 500,
+            });
     }
 }
